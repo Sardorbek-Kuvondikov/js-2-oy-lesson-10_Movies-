@@ -8,7 +8,7 @@ const runtimeToMin = (runtime) => {
   const minuts = Number(runtime % 60);
   return `${hour} hur ${minuts} min`;
 };
-const moviesRender = (array, node) => {
+const moviesRender = (array, node, regex = "") => {
   const docFrag = document.createDocumentFragment();
   node.innerHTML = "";
 
@@ -17,9 +17,18 @@ const moviesRender = (array, node) => {
 
     moviesClone.querySelector(".js-movies-img").src = movie.img_url;
     moviesClone.querySelector(".js-movies-img").alt = movie.img_alt;
-    moviesClone.querySelector(".js-movies-title").textContent = movie.title
-      .toString()
-      .slice(0, 16);
+    if (regex.source !== "(?:)" && regex) {
+      moviesClone.querySelector(".js-movies-title").innerHTML =
+        movie.title.replace(
+          regex,
+          (math) => `<mark class="bg-red-500 text-white rounded">${math}</mark>`
+        );
+    } else {
+      moviesClone.querySelector(".js-movies-title").textContent =
+        movie.title.toString().split(" ").length > 2
+          ? movie.title.split(" ").slice(0, 2).join(" ")
+          : movie.title;
+    }
     moviesClone.querySelector(".js-movies-rating").textContent =
       movie.imdb_rating;
     moviesClone.querySelector(".js-movies-year").textContent = movie.movie_year;
@@ -27,7 +36,7 @@ const moviesRender = (array, node) => {
       movie.runtime
     );
     moviesClone.querySelector(".js-movies-categories").textContent =
-      movie.categories.toString().slice(0, 19).replaceAll(",", ", ");
+      movie.categories.join(", ");
     moviesClone.querySelector(".js-modal-btn").dataset.imdbId = movie.imdb_id;
 
     docFrag.appendChild(moviesClone);
@@ -68,7 +77,7 @@ elFunctionalfn.addEventListener("submit", (evt) => {
 
   if (moviesSearch.length > 0) {
     moviesSortfn(moviesSortValue, moviesSearch);
-    moviesRender(moviesSearch, elMoviesReult);
+    moviesRender(moviesSearch, elMoviesReult, regexpValue);
     elNotFoundMovies.classList.add("hidden");
   } else {
     elMoviesReult.innerHTML = "";
